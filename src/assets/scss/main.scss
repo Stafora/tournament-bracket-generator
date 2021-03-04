@@ -1,0 +1,18 @@
+// Common styles of the project
+
+/* document style */ 
+html,body,*:after,*:before,*{
+    font-family: 'Muller';
+    outline: none;
+}
+*{
+    box-sizing: border-box;
+    &:focus{
+        outline: none !important;
+    }
+}
+body{
+    padding: 0px;
+    margin: 0px;
+    font-size: 16px;
+}
