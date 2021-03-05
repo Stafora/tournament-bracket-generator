@@ -25,12 +25,9 @@
           onmousedownPlayer: function (event){
             let self = this;
             let $el = this.$el;
-
             let shiftX = event.clientX - $el.getBoundingClientRect().left;
             let shiftY = event.clientY - $el.getBoundingClientRect().top;
-
             let currentDroppable = null;
-
             // переносит элемент на координаты вашей мышки
             // дополнительно учитывая изначальный сдвиг относительно указателя мыши
             function moveAt(pageX, pageY) {
@@ -40,7 +37,6 @@
 
             function onMouseMove(event) {
                 moveAt(event.pageX, event.pageY);
-
                 $el.style.visibility = 'hidden'
                 let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
                 $el.style.visibility = 'visible'
@@ -48,7 +44,6 @@
                 if (!elemBelow) return;
 
                 let droppableBelow = elemBelow.closest('.droppable');
-
                 if (currentDroppable != droppableBelow) {
                     currentDroppable = droppableBelow;
                 }
@@ -65,14 +60,10 @@
             // отпустить элемент, удалить ненужные обработчики
             $el.onmouseup = function() {
                 if (currentDroppable) {
-                    if(currentDroppable.appendChild($el)){
-                        $el.style.position = 'inherit';
-                        $el.style.left = 0 + 'px';
-                        $el.style.top = 0 + 'px';
-                        $el.classList.add('fixed');
-                        currentDroppable.classList.remove('droppable');
-                        self.$emit('addPlayerInMatch', self.player, currentDroppable.dataset.id);
-                    }
+                    $el.style.position = 'inherit';
+                    $el.style.left = 0 + 'px';
+                    $el.style.top = 0 + 'px';
+                    self.$emit('addPlayerInMatch', self.player, currentDroppable.dataset.id);
                 } else {
                     $el.style.position = 'inherit';
                     $el.style.left = 0 + 'px';
@@ -89,14 +80,7 @@
             let self = this;
             let $el = this.$el;
             if($el.classList.contains('fixed')){
-                $el.parentNode.classList.add('droppable');
-
                 self.$emit('removePlayerInMatch', $el.parentNode.dataset.id);
-                
-                let containerPlayers = document.querySelector('.js-players');
-                $el.classList.remove('fixed');
-                containerPlayers.appendChild($el);
-                
             }
         }
     }

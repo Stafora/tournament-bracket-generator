@@ -1,14 +1,14 @@
 <template>
-    <GridList />
+    <Tournament />
 </template>
 
 <script>
-  import GridList from '@/components/GridList.vue'
+  import Tournament from '@/components/Tournament.vue'
 
   export default {
       name: 'Home',
       components: {
-        GridList,
+        Tournament,
       },
   }
 </script>

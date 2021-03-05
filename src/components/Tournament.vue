@@ -14,17 +14,22 @@
 
           <div class="bracket">
               <ItemParent 
-                  v-for="(parent, index) in createTreeGrid"
+                  v-for="(parent, index) in gridTournementList"
                   :parent="parent"
                   :key="index"
 
-                  @searchTree="searchTree"
+                  @removePlayerInMatch="removePlayerInMatch"
               />
           </div>
 
+          <div class="btn-players-random" v-on:click="randomPlayersInGrid">
+            Распределить игроков
+          </div>
+
+          <div v-if="playerList.length"><p>Список игроков:</p></div>
           <div class="players js-players">
               <PlayerItem 
-                v-for="(player, index) in createPlayers"
+                v-for="(player, index) in playerList"
                 :player="player"
                 :key="index"
 
@@ -39,14 +44,19 @@
 
 <script>
   import * as TreeGen from "tree-json-generator";
+
+  import { HelperBinaryTree } from '@/helpers/HelperBinaryTree'
+
   import ItemParent from '@/components/ItemParent.vue'
   import PlayerItem from '@/components/PlayerItem.vue'
 
   export default {
-      name: 'Catalog',
+      name: 'Tournament',
       data() {
         return {
-            gridCount: 2,
+            gridCount: '',
+            gridTournementList: {},
+            playerList: [],
         }
       },
       /**
@@ -57,13 +67,19 @@
           PlayerItem
       },
       /**
-       * COMPUTED
+       * WATCH
        */
-      computed: {
-        /**
-         * @return random binary Tree with {Object}
-         */
-        createTreeGrid: function(){
+      watch: {
+        gridCount: function(val) {
+          this.generateGridTournementList();
+          this.generatePlayerList();
+        }
+      },
+      /**
+       * METHODS
+       */
+      methods: {
+        generateGridTournementList: function() {
           const config = {
             node: {
               id: "@id()", 
@@ -77,65 +93,61 @@
             hasChildRate: 1, // вероятность того что есть дети 0 - нет 1 - да
             maxLevel: Math.log2(this.gridCount) // количество дочерних элементов
           }
-          return TreeGen.generate(config);
+          this.gridTournementList = TreeGen.generate(config);
         },
-        /**
-         * @return random {Array} with {Object}
-         */
-        createPlayers: function(){
+        generatePlayerList: function(){
+          let number = !(this.gridCount % 2) ? this.gridCount : (Number(this.gridCount) + 1);
           const config = {
             node: {
               id: "@id()", 
               name: "@randomName()",
             },
-            rootNodesNumber: this.gridCount, // сколько массивов вначале
+            rootNodesNumber: number, // сколько массивов вначале
             childNodesNumber: [0, 0], // количество дочерних элементов
             hasChildRate: 0, // вероятность того что есть дети 0 - нет 1 - да
             maxLevel: 0 // количество дочерних элементов
           }
-          return TreeGen.generate(config);
+          this.playerList = TreeGen.generate(config);
         },
-      },
-      /**
-       * METHODS
-       */
-      methods: {
         /**
-         * set player in match
          * @param {Object} player
          * @param {String} treeId
          */
         addPlayerInMatch: function(player, treeId) {
-          let match = this.searchTree(this.createTreeGrid[0], treeId);
+          let match = HelperBinaryTree.search(this.gridTournementList[0], treeId);
           match.player = player;
+          //remove player of playerList
+          let index = this.playerList.indexOf(player);
+          this.playerList.splice(index, 1);
         },
         /**
-         * remove player in match
          * @param {String} treeId
          */
         removePlayerInMatch: function(treeId) {
-          let match = this.searchTree(this.createTreeGrid[0], treeId);
+          let match = HelperBinaryTree.search(this.gridTournementList[0], treeId);
+          //add player in playerList
+          this.playerList.push(match.player);
           match.player = false;
         },
-        /**
-         * recursion search id in object tree
-         * @param {String} element
-         * @param {String} treeId
-         * @return {Object}
-         */
-        searchTree: function(element, treeId = null){
-          if(element.id == treeId){
-            return element;
-          } else if (element.children != null){
-              var i;
-              var result = null;
-              for(i=0; result == null && i < element.children.length; i++){
-                  result = this.searchTree(element.children[i], treeId);
-              }
-              return result;
+        randomPlayersInGrid: function() {
+          if(this.playerList.length){
+            this.lastChildGridTournamentAddPlayer(this.gridTournementList[0]);
           }
-          return null;
-        }
+        },
+        lastChildGridTournamentAddPlayer(element){
+          if(element.children != null){
+              let result = null;
+              for(let i=0; result == null && i < element.children.length; i++){
+                  this.lastChildGridTournamentAddPlayer(element.children[i]);
+              }
+          } else {
+              if(!element.player){
+                element.player = this.playerList[this.playerList.length - 1];
+                this.playerList.pop();
+              }
+          }
+      }
+        
       }
   }
 </script>
@@ -143,6 +155,22 @@
 <style lang="scss">
   $side-margin: 50px;
   $vertical-margin: 10px;
+  .btn-players-random{
+    padding: 10px 20px;
+    background: rgb(58, 154, 233);
+    width: fit-content;
+    max-width: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-height: 60px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
   .droppable{
     position: relative;
     z-index: 2;
@@ -150,7 +178,6 @@
   .players{
     display: flex;
     flex-wrap: wrap;
-    margin-top: 40px;
   }
   .form-group{
     display: flex;
@@ -169,6 +196,19 @@
       width: 300px;
       padding: 0px 20px;
       font-size: 16px;
+
+      &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        color: #eee;
+      }
+      &::-moz-placeholder { /* Firefox 19+ */
+        color: #eee;
+      }
+      &:-ms-input-placeholder { /* IE 10+ */
+        color: #eee;
+      }
+      &:-moz-placeholder { /* Firefox 18- */
+        color: #eee;
+      }
     }
   }
   .section-bracket{
@@ -178,6 +218,7 @@
     width: 100%;
     display: flex;
     overflow: hidden;
+    margin-bottom: 50px;
   }
   .bracket > .item{
     margin-left: -50px;

@@ -3,7 +3,7 @@
         <div class="item">
             <div class="item-parent" :data-id="child.id" v-bind:class="{'droppable': droppable}">
                 {{child.name}}
-                <PlayerItem v-if="child.player.name" :player="child.player" :droppable="droppable" v-bind:fixed="true" @searchTree="searchTree" />
+                <PlayerItem v-if="child.player.name" :player="child.player" :droppable="droppable" v-bind:fixed="true" @removePlayerInMatch="removePlayerInMatch" />
             </div>
             <div class="item-childrens" v-if="child.children">
                 <ItemChild
@@ -11,7 +11,7 @@
                     :child="item"
                     :key="index"
 
-                    @searchTree="searchTree"
+                    @removePlayerInMatch="removePlayerInMatch"
                 />  
             </div>  
         </div>
@@ -58,8 +58,8 @@
           /**
            * @param {String} id
            */
-          searchTree: function(id){
-              this.$emit('searchTree', id);
+          removePlayerInMatch: function(treeId){
+            this.$emit('removePlayerInMatch', treeId);
           }
       },
       beforeCreate: function () {
