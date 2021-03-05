@@ -141,7 +141,7 @@
                   this.lastChildGridTournamentAddPlayer(element.children[i]);
               }
           } else {
-              if(!element.player){
+              if(!element.player && element.match){
                 element.player = this.playerList[this.playerList.length - 1];
                 this.playerList.pop();
               }
