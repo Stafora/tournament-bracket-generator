@@ -10,7 +10,7 @@
 
   import DefaulLayout from '@/layouts/DefaultLayout.vue'
   import HomeLayout from '@/layouts/HomeLayout.vue'
-
+  
   export default {
       name: 'App',
       computed:{
@@ -20,6 +20,15 @@
       },
       components: {
         DefaulLayout, HomeLayout
+      },
+      created() {
+        let body = document.querySelector('body');
+        body.classList.add('body');
+      },
+      methods: {
+        handleScroll: function(evt, el) {
+          console.log('asd');
+        }
       }
   }
 </script>
@@ -29,7 +38,7 @@
       background-color: DarkSalmon ;
     }
     .wrapper{
-      width: 1200px;
+      width: 100%;
       height: auto;
       padding: 0px 15px;
       margin-left: auto;
